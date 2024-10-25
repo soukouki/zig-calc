@@ -9,7 +9,35 @@ pub fn main() !void {
     var buffer: [256]u8 = undefined;
     const result = try stdin.readUntilDelimiterOrEof(&buffer, '\n');
     const line = result orelse return;
-    try stdout.print("{d}\n", .{readInt(line)});
+    try stdout.print("{d}\n", .{readAddSub(line)});
+}
+
+fn readAddSub(str: []const u8) i32 {
+    var result: i32 = readInt(str);
+    while (str.len > index and (str[index] == '+' or str[index] == '-')) {
+        const op = str[index];
+        index += 1;
+        const next = readInt(str);
+        if (op == '+') {
+            result += next;
+        } else {
+            result -= next;
+        }
+    }
+    return result;
+}
+
+test "readAddSub" {
+    index = 0;
+    try testing.expectEqual(1, readAddSub("1"));
+    index = 0;
+    try testing.expectEqual(3, readAddSub("1+2"));
+    index = 0;
+    try testing.expectEqual(6, readAddSub("1+2+3"));
+    index = 0;
+    try testing.expectEqual(1, readAddSub("2-1"));
+    index = 0;
+    try testing.expectEqual(-1, readAddSub("1-2"));
 }
 
 fn readInt(str: []const u8) i32 {
