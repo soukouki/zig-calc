@@ -41,11 +41,11 @@ test "readAddSub" {
 }
 
 fn readMulDiv(str: []const u8) i32 {
-    var result: i32 = readInt(str);
+    var result: i32 = readParen(str);
     while (str.len > index and (str[index] == '*' or str[index] == '/')) {
         const op = str[index];
         index += 1;
-        const next = readInt(str);
+        const next = readParen(str);
         if (op == '*') {
             result *= next;
         } else {
@@ -71,6 +71,33 @@ test "readMulDiv" {
     try testing.expectEqual(5, readAddSub("1*2+3"));
     index = 0;
     try testing.expectEqual(7, readAddSub("1+2*3"));
+}
+
+fn readParen(str: []const u8) i32 {
+    if (str[index] == '(') {
+        index += 1;
+        const result = readAddSub(str);
+        if (str[index] != ')') {
+            @panic("expected ')'");
+        }
+        index += 1;
+        return result;
+    } else {
+        return readInt(str);
+    }
+}
+
+test "readParen" {
+    index = 0;
+    try testing.expectEqual(1, readParen("1"));
+    index = 0;
+    try testing.expectEqual(1, readParen("(1)"));
+    index = 0;
+    try testing.expectEqual(6, readAddSub("(1+(2))+3"));
+    index = 0;
+    try testing.expectEqual(9, readAddSub("(1+2)*3"));
+    index = 0;
+    try testing.expectEqual(5, readAddSub("1*(2+3)"));
 }
 
 fn readInt(str: []const u8) i32 {
